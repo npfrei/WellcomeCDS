@@ -4,11 +4,12 @@ from tqdm.auto import tqdm
 import matplotlib.pylab as plt
 import csv
 url = "https://api.wellcomecollection.org/catalogue/v2/images"
-
+from collections import Counter
 
 results = {}
 
 # count for every year (1500-2021)
+"""
 
 for i in range(1500, 2022):
     response = requests.get(
@@ -29,3 +30,41 @@ with open('years.csv', 'w') as csv_file:
     writer = csv.writer(csv_file)
     for key, value in results.items():
        writer.writerow([key, value])
+ 
+#get genress :
+response = requests.get(
+        url,
+        params={"include" :  "source.genres", "pageSize" : "100"}
+        
+            
+            
+).json()
+
+genres = []
+for i in response["results"] : 
+    q = i["source"]["genres"]
+    if not (not q) :
+        genres.append(q[0]["label"])
+while "nextPage" in response:
+    
+    response = requests.get(response["nextPage"]).json()
+    
+    if "errorType" not in response :
+        for i in response["results"] : 
+            q = i["source"]["genres"]
+            if not (not q) :
+                genres.append(q[0]["label"])
+        print("a")        
+final_count= Counter(genres)
+with open('genres.csv', 'w') as csv_file:  
+    writer = csv.writer(csv_file)
+    for key, value in final_count.items():
+       writer.writerow([key, value])
+print(final_count)
+""" 
+
+response = requests.get(
+        url,
+        params={"aggregations" :  "locations.license", "pageSize" : "100"}).json()
+
+print(response["results"])
