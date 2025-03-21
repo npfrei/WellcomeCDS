@@ -6,6 +6,11 @@ import csv
 url = "https://api.wellcomecollection.org/catalogue/v2/images"
 from collections import Counter
 from collections import OrderedDict
+from PIL import Image
+import os
+import numpy as np
+from itertools import chain
+import seaborn as sns
 
 results = {}
 
@@ -30,6 +35,8 @@ def plt_csv(file ,xlabel,ylabel, ytype: type, xtype:type, min, plotf):
     plt.xticks(rotation=70)
     plt.legend() 
     plt.show() 
+    
+   
 
 # count for every year (1500-2021)
 """
@@ -91,6 +98,43 @@ response = requests.get(
         params={"aggregations" :  "locations.license", "pageSize" : "100"}).json()
 
 print(response["results"])
-""" 
+
+#plot csv files
 plt_csv('years.csv', "Year", "Number of Images", int, int, 0, plt.bar)
 plt_csv("genres.csv", "Genre", "Number of Images", int, str, 5, plt.barh)
+""" 
+#get resoltion of images, HAVE TO DOWNLOAD FROM NAS
+path = 'images'
+files = os.listdir(path)
+resolutions = {}
+w = []
+h= []
+i = 0
+for file in files:
+    image = Image.open("images/" + file)
+
+    # Get the size of the image
+    width, height = image.size
+    resolutions.update({file.removesuffix('.jpg') : (width,height)})
+    w.append(width)
+    h.append(height)
+    i=i+1
+    print(i)
+res_count = Counter(resolutions.values())
+
+
+
+
+
+with open('res_120000.csv', 'w') as csv_file:  
+    writer = csv.writer(csv_file)
+    for key, value in resolutions.items():
+       writer.writerow([key, value])
+with open('res_count_120000.csv', 'w') as csv_file:  
+    writer = csv.writer(csv_file)
+    for key, value in res_count.items():
+       writer.writerow([key, value])
+
+plt.scatter(w, h, color = 'g', s=0.4)
+plt.show() 
+plt_csv('res_count_120000.csv', "count", "res", int, str, 1, plt.bar)
