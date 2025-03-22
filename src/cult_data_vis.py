@@ -3,6 +3,7 @@ import requests
 from tqdm.auto import tqdm
 import matplotlib.pylab as plt
 import csv
+
 url = "https://api.wellcomecollection.org/catalogue/v2/images"
 from collections import Counter
 from collections import OrderedDict
@@ -11,7 +12,8 @@ import os
 import numpy as np
 from itertools import chain
 import seaborn as sns
-import helpers
+from helpers import plot_dict_from_csv, write_dict_to_csv
+
 results = {}
 
 
@@ -78,35 +80,31 @@ print(response["results"])
 #plot csv files
 plt_csv('years.csv', "Year", "Number of Images", int, int, 0, plt.bar)
 plt_csv("genres.csv", "Genre", "Number of Images", int, str, 5, plt.barh)
-""" 
-#get resoltion of images, HAVE TO DOWNLOAD FROM NAS
-path = 'images'
-files = os.listdir(path)
+"""
+
+
+# get resoltion of images, HAVE TO DOWNLOAD FROM NAS
+IMAGE_PATH = "images"
+files = os.listdir(IMAGE_PATH)
 resolutions = {}
 w = []
-h= []
+h = []
 i = 0
 for file in files:
     image = Image.open("images/" + file)
 
     # Get the size of the image
     width, height = image.size
-    resolutions.update({file.removesuffix('.jpg') : (width,height)})
+    resolutions.update({file.removesuffix(".jpg"): (width, height)})
     w.append(width)
     h.append(height)
-    i=i+1
+    i = i + 1
     print(i)
 res_count = Counter(resolutions.values())
 
 
+write_dict_to_csv("data/res_count_120000.csv", res_count)
 
-
-
-with open('res_count_120000.csv', 'w') as csv_file:  
-    writer = csv.writer(csv_file)
-    for key, value in res_count.items():
-       writer.writerow([key, value])
-
-plt.scatter(w, h, color = 'g', s=0.4)
-plt.show() 
-plt_csv('res_count_120000.csv', "count", "res", int, str, 1, plt.bar)
+plt.scatter(w, h, color="g", s=0.4)
+plt.show()
+plot_dict_from_csv("data/res_count_120000.csv", "count", "res", int, str, 1, plt.bar)
