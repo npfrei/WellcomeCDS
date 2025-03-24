@@ -175,3 +175,115 @@ def fetch_specific_work(work_id: str, include: str = None) -> dict:
 
     response.raise_for_status()
     return response.json()
+
+def fetch_images(
+    query: str = None,
+    locations_license: str = None,
+    source_contributors_agent_label: str = None,
+    source_genres_label: str = None,
+    source_subjects_label: str = None,
+    sort: str = None,
+    sortOrder: str = None,
+    source_production_dates_to: str = None,
+    source_production_dates_from: str = None,
+    colors: str = None,
+    include: str = None,
+    aggregations: str = None,
+    page: int = 1,
+    pageSize: int = 10,
+) -> dict:
+    """
+    Fetches a paginated list of images from the Wellcome Collection API.
+
+    Parameters
+    ----------
+    query : str, optional
+        Full-text search query.
+    locations_license : str, optional
+        License type (e.g., "cc-by", "pdm", "ogl").
+    source_contributors_agent_label : str, optional
+        Filter images by contributor of the source works.
+    source_genres_label : str, optional
+        Filter images by genre of the source works.
+    source_subjects_label : str, optional
+        Filter images by subjects of the source works.
+    sort : str, optional
+        Sort field, typically "source.production.dates".
+    sortOrder : str, optional
+        Sort order, either "asc" or "desc".
+    source_production_dates_to : str, optional
+        Upper bound date for image production (YYYY-MM-DD).
+    source_production_dates_from : str, optional
+        Lower bound date for image production (YYYY-MM-DD).
+    colors : str, optional
+        Filter images by colors.
+    include : str, optional
+        Comma-separated list of extra fields to include (e.g., "source.genres").
+    aggregations : str, optional
+        Aggregated data to include (e.g., "locations.license").
+    page : int, default=1
+        Page number to retrieve (>= 1).
+    pageSize : int, default=10
+        Number of images per page (between 1 and 100).
+
+    Returns
+    -------
+    dict
+        JSON response containing image data and pagination details.
+
+    Raises
+    ------
+    ValueError
+        If `page` is less than 1 or `pageSize` is not between 1 and 100.
+    requests.HTTPError
+        If the API request returns an unsuccessful status code.
+    """
+    if not (1 <= pageSize <= 100):
+        raise ValueError(f"pageSize must be between 1 and 100, got {pageSize}")
+    if page < 1:
+        raise ValueError(f"page must be >= 1, got {page}")
+
+    params = {
+        "query": query,
+        "locations.license": locations_license,
+        "source.contributors.agent.label": source_contributors_agent_label,
+        "source.genres.label": source_genres_label,
+        "source.subjects.label": source_subjects_label,
+        "sort": sort,
+        "sortOrder": sortOrder,
+        "source.production.dates.to": source_production_dates_to,
+        "source.production.dates.from": source_production_dates_from,
+        "colors": colors,
+        "include": include,
+        "aggregations": aggregations,
+        "page": page,
+        "pageSize": pageSize,
+    }
+
+    # Remove None values
+    params = {k: v for k, v in params.items() if v is not None}
+
+    response = requests.get(BASE_URL + "images", params=params, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+def fetch_specific_image(image_id: str, include: str = None) -> dict:
+    """
+    Returns a single image by the `id` of the image from the Wellcome Collection
+
+    Parameters
+    ----------
+    image_id : str
+        The id of the fetched image
+	string
+        Enum: "visuallySimilar" "withSimilarFeatures" "withSimilarColors" "source.contributors" "source.languages" "source.genres" "source.subjects"
+        A comma-separated list of extra fields to include
+    """
+    params = {"include": include}
+    response = requests.get(
+        BASE_URL + "images/" + f"{image_id}", params=params, timeout=10
+    )
+
+    response.raise_for_status()
+    return response.json()
