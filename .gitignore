@@ -3,3 +3,6 @@
 *.json
 *.json.gz
 *.feather
+*.png
+*.pickle
+*.safetensors
