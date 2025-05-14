@@ -8,6 +8,7 @@ This API is documented here: https://developers.wellcomecollection.org/api/catal
 
 # from typing import Optional
 import requests
+from IPython.display import Image, display
 
 BASE_URL = "https://api.wellcomecollection.org/catalogue/v2/"
 
@@ -170,7 +171,7 @@ def fetch_specific_work(work_id: str, include: str = None) -> dict:
     """
     params = {"include": include}
     response = requests.get(
-        BASE_URL + "works/" + f"{work_id}", params=params, timeout=10
+        BASE_URL + "works/" + f"{work_id}", params=params, timeout=15
     )
 
     response.raise_for_status()
@@ -287,3 +288,71 @@ def fetch_specific_image(image_id: str, include: str = None) -> dict:
 
     response.raise_for_status()
     return response.json()
+
+
+def get_full_res_url(iiif_url:str, resolution="full") -> str:
+    """IIIF urls are the following format: {base}/{region}/{resolution}/{rotation}/{quality}.{format}
+    example: "https://iiif.wellcomecollection.org/image/V0021817/full/300,/0/default.jpg"
+             Here resolution="300,"
+    Args:
+        iiif_url (str): _description_
+        resolution (str, optional): _description_. Defaults to "full".
+
+    Returns:
+        str: modified url to get image at expected resolution
+    """
+    if 'iiif' in iiif_url:
+        # split the string at the fifth '/' symbol (right before resolution)
+        parts = iiif_url.split('/', 5)
+        # Keeps the left part
+        left_part = "/".join(parts[:5]) 
+        # Manually add the right part depending on expected resolution
+        full_res_url = f"{left_part}/full/{resolution}/0/default.jpg"
+    else:
+        raise Exception("Not a valid IIIF URL.")
+    return full_res_url
+
+
+def display_images_on_query(query: str, nb_imgs=5, resolution="full") -> None:
+    """Displays images present in the collection that contain a queried word in their title
+
+    Args:
+        query (str): a key word to query the image title on
+        resolution (str, optional): the resolution at which we want to display the images. Defaults to "full".
+    """
+    search_url = f"{BASE_URL}/images"
+    
+    params = {
+        "query": query,
+        "pageSize": nb_imgs
+    }
+    
+    response = requests.get(search_url, params=params)
+    data = response.json()
+
+    for work in data.get("results", []):
+        title = work.get("source").get("title")
+        iiif_url = work.get("thumbnail", {}).get("url")
+        
+        if iiif_url:
+            print(title)
+            print(iiif_url) # for debugging
+            full_res_url = get_full_res_url(iiif_url, resolution=resolution)
+            display(Image(url=full_res_url))
+
+
+def fetch_iiif_images_on_query(image_id: str, include: str= None) -> None:
+    """
+
+    Args:
+        image_id (str): _description_
+        include (str, optional): _description_. Defaults to None.
+
+    Returns:
+        : _description_
+    """
+    params = {"include": include}
+    # response = requests.get(
+    #     BASE_URL + "images/" + f"{image_id}", params=params, timeout=10
+    # )
+    # return response.json()

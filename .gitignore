@@ -6,3 +6,4 @@
 *.png
 *.pickle
 *.safetensors
+src/scripts/__pycache__/*
