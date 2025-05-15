@@ -339,7 +339,33 @@ def display_images_on_query(query: str, nb_imgs=5, resolution="full") -> None:
             print(iiif_url) # for debugging
             full_res_url = get_full_res_url(iiif_url, resolution=resolution)
             display(Image(url=full_res_url))
+def get_image_list_on_query(query: str, nb_imgs=5, resolution="full") :
+    """Displays images present in the collection that contain a queried word in their title
 
+    Args:
+        query (str): a key word to query the image title on
+        resolution (str, optional): the resolution at which we want to display the images. Defaults to "full".
+    """
+    search_url = f"{BASE_URL}/images"
+    
+    params = {
+        "query": query,
+        "pageSize": nb_imgs
+    }
+    
+    response = requests.get(search_url, params=params)
+    data = response.json()
+    image_list = []
+    for work in data.get("results", []):
+        
+        iiif_url = work.get("thumbnail", {}).get("url")
+        id = work.get("id", "")
+        
+        if iiif_url:
+            
+            full_res_url = get_full_res_url(iiif_url, resolution=resolution)
+            image_list.append(dict({"url" : full_res_url, "id": id}))
+    return image_list        
 
 def fetch_iiif_images_on_query(image_id: str, include: str= None) -> None:
     """
