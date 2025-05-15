@@ -94,7 +94,7 @@ def get_Graph():
     for a,b in occurrences2.items():
         for i,j in co_occurrences[a].items():
         
-            if(occurrences2.get(i)!= None and a!=i and j>8):
+            if(occurrences2.get(i)!= None and a!=i and j>5):
                 G.add_edge(a,i, weight=j)
     return G
 def display_Graph(G):

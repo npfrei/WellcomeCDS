@@ -9,7 +9,7 @@ This API is documented here: https://developers.wellcomecollection.org/api/catal
 # from typing import Optional
 import requests
 from IPython.display import Image, display
-
+import random
 BASE_URL = "https://api.wellcomecollection.org/catalogue/v2/"
 
 
@@ -350,7 +350,7 @@ def get_image_list_on_query(query: str, nb_imgs=5, resolution="full") :
     
     params = {
         "query": query,
-        "pageSize": nb_imgs
+        "pageSize": 100
     }
     
     response = requests.get(search_url, params=params)
@@ -365,7 +365,8 @@ def get_image_list_on_query(query: str, nb_imgs=5, resolution="full") :
             
             full_res_url = get_full_res_url(iiif_url, resolution=resolution)
             image_list.append(dict({"url" : full_res_url, "id": id}))
-    return image_list        
+    return random.sample(image_list,nb_imgs)      
+          
 
 def fetch_iiif_images_on_query(image_id: str, include: str= None) -> None:
     """
