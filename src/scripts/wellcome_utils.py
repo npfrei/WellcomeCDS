@@ -6,7 +6,7 @@ This API is documented here: https://developers.wellcomecollection.org/api/catal
 
 """
 
-# from typing import Optional
+from typing import Optional
 import requests
 from IPython.display import Image, display
 import random
@@ -14,31 +14,31 @@ BASE_URL = "https://api.wellcomecollection.org/catalogue/v2/"
 
 
 def fetch_works(
-    query: str = None,
-    include: str = None,
-    items_locations_locationType: str = None,
-    workType: str = None,
-    type: str = None,
-    aggregations: str = None,
-    languages: str = None,
-    genres_label: str = None,
-    genres: str = None,
-    subjects_label: str = None,
-    subjects: str = None,
-    contributors_agent_label: str = None,
-    contributors_agent: str = None,
-    identifiers: str = None,
-    items: str = None,
-    items_identifiers: str = None,
-    partOf: str = None,
-    partOf_title: str = None,
-    availabilities: str = None,
-    items_locations_accessConditions_status: str = None,
-    items_locations_license: str = None,
-    sort: str = None,
-    sortOrder: str = None,
-    production_dates_from: str = None,
-    production_dates_to: str = None,
+    query: Optional[str] = None,
+    include: Optional[str] = None,
+    items_locations_locationType: Optional[str] = None,
+    workType: Optional[str] = None,
+    type: Optional[str] = None,
+    aggregations: Optional[str] = None,
+    languages: Optional[str] = None,
+    genres_label: Optional[str] = None,
+    genres: Optional[str] = None,
+    subjects_label: Optional[str] = None,
+    subjects: Optional[str] = None,
+    contributors_agent_label: Optional[str] = None,
+    contributors_agent: Optional[str] = None,
+    identifiers: Optional[str] = None,
+    items: Optional[str] = None,
+    items_identifiers: Optional[str] = None,
+    partOf: Optional[str] = None,
+    partOf_title: Optional[str] = None,
+    availabilities: Optional[str] = None,
+    items_locations_accessConditions_status: Optional[str] = None,
+    items_locations_license: Optional[str] = None,
+    sort: Optional[str] = None,
+    sortOrder: Optional[str] = None,
+    production_dates_from: Optional[str] = None,
+    production_dates_to: Optional[str] = None,
     page: int = 1,
     pageSize: int = 10,
 ) -> dict:
@@ -157,7 +157,7 @@ def fetch_works(
     return response.json()
 
 
-def fetch_specific_work(work_id: str, include: str = None) -> dict:
+def fetch_specific_work(work_id: str, include: Optional[str] = None) -> dict:
     """
     Returns a single work by the `id` of the work from the Wellcome Collection
 
@@ -178,18 +178,18 @@ def fetch_specific_work(work_id: str, include: str = None) -> dict:
     return response.json()
 
 def fetch_images(
-    query: str = None,
-    locations_license: str = None,
-    source_contributors_agent_label: str = None,
-    source_genres_label: str = None,
-    source_subjects_label: str = None,
-    sort: str = None,
-    sortOrder: str = None,
-    source_production_dates_to: str = None,
-    source_production_dates_from: str = None,
-    colors: str = None,
-    include: str = None,
-    aggregations: str = None,
+    query: Optional[str] = None,
+    locations_license: Optional[str] = None,
+    source_contributors_agent_label: Optional[str] = None,
+    source_genres_label: Optional[str] = None,
+    source_subjects_label: Optional[str] = None,
+    sort: Optional[str] = None,
+    sortOrder: Optional[str] = None,
+    source_production_dates_to: Optional[str] = None,
+    source_production_dates_from: Optional[str] = None,
+    colors: Optional[str] = None,
+    include: Optional[str] = None,
+    aggregations: Optional[str] = None,
     page: int = 1,
     pageSize: int = 10,
 ) -> dict:
@@ -269,7 +269,7 @@ def fetch_images(
     return response.json()
 
 
-def fetch_specific_image(image_id: str, include: str = None) -> dict:
+def fetch_specific_image(image_id: str, include: Optional[str] = None) -> dict:
     """
     Returns a single image by the `id` of the image from the Wellcome Collection
 
@@ -324,13 +324,15 @@ def display_images_on_query(query: str, nb_imgs=5, resolution="full") -> None:
     
     params = {
         "query": query,
-        "pageSize": nb_imgs
+        "pageSize": 100
     }
     
     response = requests.get(search_url, params=params)
     data = response.json()
 
-    for work in data.get("results", []):
+    data = random.sample(data.get("results", []), nb_imgs)
+
+    for work in data:
         title = work.get("source").get("title")
         iiif_url = work.get("thumbnail", {}).get("url")
         
@@ -339,6 +341,8 @@ def display_images_on_query(query: str, nb_imgs=5, resolution="full") -> None:
             print(iiif_url) # for debugging
             full_res_url = get_full_res_url(iiif_url, resolution=resolution)
             display(Image(url=full_res_url))
+            
+            
 def get_image_list_on_query(query: str, nb_imgs=5, resolution="full") :
     """Displays images present in the collection that contain a queried word in their title
 
@@ -365,20 +369,20 @@ def get_image_list_on_query(query: str, nb_imgs=5, resolution="full") :
             
             full_res_url = get_full_res_url(iiif_url, resolution=resolution)
             image_list.append(dict({"url" : full_res_url, "id": id}))
-    return random.sample(image_list,nb_imgs)      
+    return random.sample(image_list, nb_imgs)      
           
 
-def fetch_iiif_images_on_query(image_id: str, include: str= None) -> None:
-    """
+# def fetch_iiif_images_on_query(image_id: str, include: str= None) -> None:
+#     """
 
-    Args:
-        image_id (str): _description_
-        include (str, optional): _description_. Defaults to None.
+#     Args:
+#         image_id (str): _description_
+#         include (str, optional): _description_. Defaults to None.
 
-    Returns:
-        : _description_
-    """
-    params = {"include": include}
+#     Returns:
+#         : _description_
+#     """
+#     params = {"include": include}
     # response = requests.get(
     #     BASE_URL + "images/" + f"{image_id}", params=params, timeout=10
     # )

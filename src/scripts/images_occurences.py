@@ -97,6 +97,7 @@ def get_Graph():
             if(occurrences2.get(i)!= None and a!=i and j>5):
                 G.add_edge(a,i, weight=j)
     return G
+
 def display_Graph(G):
     df = nx.to_pandas_edgelist(G)
     df.columns = ["from", "to", "weight"]
