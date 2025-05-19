@@ -7,3 +7,4 @@
 *.pickle
 *.safetensors
 src/scripts/__pycache__/*
+.DS_Store
