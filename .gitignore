@@ -1,6 +1,6 @@
 *.jpg
 *.csv
-*.json
+data/*.json
 *.json.gz
 *.feather
 *.png
